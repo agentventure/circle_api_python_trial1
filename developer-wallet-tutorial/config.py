@@ -1,6 +1,9 @@
 from circle.web3 import utils
 from circle.web3 import developer_controlled_wallets
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize the client
 client = utils.init_developer_controlled_wallets_client(
