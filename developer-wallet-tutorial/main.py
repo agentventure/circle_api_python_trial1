@@ -1,4 +1,4 @@
-from steps import create_wallet_set, create_wallet, get_wallet_balance, create_transaction, sign_transaction
+from steps import create_wallet_set, create_wallet, get_wallet_balance, create_transaction
 
 def main():
     print("🚀 Starting Circle Developer-Controlled Wallets Quickstart...")
@@ -18,11 +18,7 @@ def main():
     # Step 4: Create a transaction
     print("\n📝 Step 4: Creating a transaction...")
     create_transaction()
-    
-    # Step 5: Sign a transaction
-    print("\n✍️ Step 5: Signing a transaction...")
-    sign_transaction()
-    
+
     print("\n✅ Quickstart completed!")
 
 if __name__ == "__main__":

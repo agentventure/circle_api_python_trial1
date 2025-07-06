@@ -119,24 +119,3 @@ def create_transaction():
     except developer_controlled_wallets.ApiException as e:
         print(f"❌ Error creating transaction: {e}")
         return None
-
-def sign_transaction():
-    """Step 5: Sign a transaction"""
-    if not transaction_id:
-        print("❌ No transaction ID available")
-        return None
-    
-    try:
-        # Sign the transaction directly with transaction ID and wallet ID
-        sign_request = developer_controlled_wallets.SignTransactionRequest.from_dict({
-            "transactionId": transaction_id,
-            "walletId": wallet_id
-        })
-        sign_response = signing_api.sign_transaction(sign_request)
-        
-        print(f"✅ Transaction signed successfully")
-        print(f"📝 Signature: {sign_response.data.signature}")
-        return sign_response.data.signature
-    except developer_controlled_wallets.ApiException as e:
-        print(f"❌ Error signing transaction: {e}")
-        return None 
