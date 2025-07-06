@@ -24,9 +24,13 @@ def create_wallet_set():
         print(f"❌ Error creating wallet set: {e}")
         return None
 
-def create_wallet():
+def create_wallet(wallet_set_id=None):
     """Step 2: Create a wallet"""
     global wallet_id
+    
+    # Use parameter if provided, otherwise fall back to global variable
+    if not wallet_set_id:
+        wallet_set_id = globals().get('wallet_set_id')
     
     if not wallet_set_id:
         print("❌ No wallet set ID available")
@@ -46,8 +50,12 @@ def create_wallet():
         print(f"❌ Error creating wallet: {e}")
         return None
 
-def get_wallet_balance():
+def get_wallet_balance(wallet_id=None):
     """Step 3: Get wallet balance"""
+    # Use parameter if provided, otherwise fall back to global variable
+    if not wallet_id:
+        wallet_id = globals().get('wallet_id')
+    
     if not wallet_id:
         print("❌ No wallet ID available")
         return None
@@ -56,6 +64,13 @@ def get_wallet_balance():
         response = wallets_api.list_wallet_balance(wallet_id)
         balances = response.data.token_balances
         print(f"💰 Wallet balances:")
+        
+        balance_info = {
+            "wallet_id": wallet_id,
+            "balances": [],
+            "raw_balances": balances
+        }
+        
         if balances:
             for balance in balances:
                 token = balance.token
@@ -68,28 +83,49 @@ def get_wallet_balance():
                 else:
                     human_readable = float(amount)
                 
+                balance_data = {
+                    "token_id": token.id,
+                    "symbol": token.symbol,
+                    "name": token.name,
+                    "amount": amount,
+                    "human_readable_amount": human_readable,
+                    "blockchain": str(token.blockchain),
+                    "token_address": token.token_address,
+                    "decimals": token.decimals,
+                    "last_updated": balance.update_date
+                }
+                balance_info["balances"].append(balance_data)
+                
                 print(f"  - {human_readable} {token.symbol} ({token.name})")
                 print(f"    Blockchain: {token.blockchain}")
                 print(f"    Token Address: {token.token_address}")
+                print(f"    Token ID: {token.id}")
                 print(f"    Last Updated: {balance.update_date}")
         else:
             print("  - No balances found")
-        return balances
+            
+        return balance_info
     except developer_controlled_wallets.ApiException as e:
         print(f"❌ Error getting wallet balance: {e}")
         return None
 
-def create_transaction():
+def create_transaction(wallet_id=None, destination_address=None, amount=None, token_id=None):
     """Step 4: Create a transaction"""
     global transaction_id
+    
+    # Use parameters if provided, otherwise fall back to environment variables or global
+    if not wallet_id:
+        wallet_id = globals().get('wallet_id')
+    if not destination_address:
+        destination_address = os.environ.get("DESTINATION_ADDRESS")
+    if not amount:
+        amount = os.environ.get("AMOUNT")
+    if not token_id:
+        token_id = os.environ.get("TOKEN_ID")
+    
     if not wallet_id:
         print("❌ No wallet ID available")
         return None
-    # Prompt user for required values
-    destination_address = os.environ.get("DESTINATION_ADDRESS")
-    encrypted_entity_secret = os.environ.get("ENTITY_SECRET_CIPHERTEXT")
-    amount = os.environ.get("AMOUNT")
-    token_id = os.environ.get("TOKEN_ID")
     # Optionally prompt for gas values
     # gas_limit = input("Enter gas limit (or leave blank to skip): ")
     # gas_price = input("Enter gas price in gwei (or leave blank to skip): ")
