@@ -3,8 +3,9 @@ from config import wallets_api
 def debug_balance_response():
     try:
         # Use the wallet ID from the previous successful creation
-        wallet_id = "4e954899-c507-50e2-8fe4-8f7bf548993d"
-        
+        #wallet_id = "4e954899-c507-50e2-8fe4-8f7bf548993d"
+        wallet_id = "46709485-a176-5cb4-bc28-f2c8d7400685"
+
         response = wallets_api.list_wallet_balance(wallet_id)
         
         print("Balance Response structure:")
