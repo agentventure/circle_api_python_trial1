@@ -1,49 +1,51 @@
 from circle.web3 import developer_controlled_wallets
+from config import transactions_api
+import os
+import uuid
 
-def debug_transaction_classes():
-    print("Available transaction-related classes:")
-    for attr in dir(developer_controlled_wallets):
-        if 'transaction' in attr.lower() or 'transfer' in attr.lower():
-            print(f"  {attr}")
+# Use environment variables
+wallet_id = os.environ.get("WALLET_ID")
+destination_address = os.environ.get("DESTINATION_ADDRESS") 
+amount = os.environ.get("AMOUNT")
+token_id = os.environ.get("TOKEN_ID")
 
-def debug_transaction_request():
+print(f"Wallet ID: {wallet_id}")
+print(f"Destination: {destination_address}")
+print(f"Amount: {amount}")
+print(f"Token ID: {token_id}")
+
+if wallet_id and destination_address and amount and token_id:
     try:
-        # Use the wallet ID from the previous successful creation
-        wallet_id = "ad01d502-fdc6-5909-a7ee-cd59006f1c45"
+        idempotency_key = str(uuid.uuid4())
+        request_dict = {
+            "idempotencyKey": idempotency_key,
+            "amounts": [amount],
+            "destinationAddress": destination_address,
+            "walletId": wallet_id,
+            "tokenId": token_id,
+            "feeLevel": 'MEDIUM',
+        }
         
-        # Try different possible class names
-        possible_classes = [
-            'CreateDeveloperTransactionTransferRequest',
-            'CreateTransactionTransferRequest',
-            'CreateTransferRequest',
-            'CreateTransactionRequest'
-        ]
+        print(f"\nRequest dict: {request_dict}")
         
-        for class_name in possible_classes:
-            try:
-                class_obj = getattr(developer_controlled_wallets, class_name)
-                print(f"✅ Found class: {class_name}")
-                
-                # Try to create a request
-                request = class_obj.from_dict({
-                    "walletId": wallet_id,
-                    "destinationAddress": "0x1234567890123456789012345678901234567890",
-                    "amount": "0.001",
-                    "currency": "USD",
-                    "blockchain": "ETH-SEPOLIA"
-                })
-                print(f"✅ Successfully created request with {class_name}")
-                return class_name
-                
-            except AttributeError:
-                print(f"❌ Class not found: {class_name}")
-            except Exception as e:
-                print(f"⚠️ Error with {class_name}: {e}")
-                
+        request = developer_controlled_wallets.CreateTransferTransactionForDeveloperRequest.from_dict(request_dict)
+        response = transactions_api.create_developer_transaction_transfer(request)
+        
+        print(f"\nResponse type: {type(response)}")
+        print(f"Response data type: {type(response.data)}")
+        print(f"Response data attributes: {dir(response.data)}")
+        print(f"Response data: {response.data}")
+        
+        # Try different ways to access transaction ID
+        print(f"\nTrying to find transaction ID...")
+        if hasattr(response.data, 'transaction_id'):
+            print(f"Found transaction_id: {response.data.transaction_id}")
+        if hasattr(response.data, 'transaction'):
+            print(f"Found transaction: {response.data.transaction}")
+        if hasattr(response.data, 'id'):
+            print(f"Found id: {response.data.id}")
+            
     except Exception as e:
         print(f"Error: {e}")
-
-if __name__ == "__main__":
-    debug_transaction_classes()
-    print("\n" + "="*50 + "\n")
-    debug_transaction_request() 
+else:
+    print("Missing required environment variables")

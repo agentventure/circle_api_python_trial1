@@ -112,8 +112,9 @@ def create_transaction():
         #     request_dict["gasPrice"] = gas_price
         request = developer_controlled_wallets.CreateTransferTransactionForDeveloperRequest.from_dict(request_dict)
         response = transactions_api.create_developer_transaction_transfer(request)
-        transaction_id = response.data.transaction.actual_instance.transaction_id
+        transaction_id = response.data.id
         print(f"✅ Created transaction with ID: {transaction_id}")
+        print(f"📊 Transaction State: {response.data.state}")
         return transaction_id
     except developer_controlled_wallets.ApiException as e:
         print(f"❌ Error creating transaction: {e}")
@@ -126,13 +127,10 @@ def sign_transaction():
         return None
     
     try:
-        # Get the transaction to sign
-        response = transactions_api.get_transaction(transaction_id)
-        transaction = response.data.transaction
-        
-        # Sign the transaction
+        # Sign the transaction directly with transaction ID and wallet ID
         sign_request = developer_controlled_wallets.SignTransactionRequest.from_dict({
-            "transactionId": transaction_id
+            "transactionId": transaction_id,
+            "walletId": wallet_id
         })
         sign_response = signing_api.sign_transaction(sign_request)
         
